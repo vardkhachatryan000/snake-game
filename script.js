@@ -2,7 +2,6 @@ const gameBoard = document.getElementById("gameBoard");
 const ctx = gameBoard.getContext("2d");
 const scoreContext = document.getElementById("gameScore");
 const startGameBtn = document.getElementById("startGame");
-const resetBtn = document.getElementById("resetGame");
 const boardWidth = gameBoard.width;
 const boardHeight = gameBoard.height;
 const boardBg = "white";
@@ -47,7 +46,6 @@ function startGame() {
 
   isRunning = true;
   resetGame();
-  scoreContext.textContent = score;
   createFood();
   nextTick();
 };
@@ -78,8 +76,10 @@ function randomFoodCoord(min, max) {
 }
 
 function createFood() {
-  foodX = randomFoodCoord(0, boardWidth - UNIT_STEP);
-  foodY = randomFoodCoord(0, boardWidth - UNIT_STEP);
+  do {
+    foodX = randomFoodCoord(0, boardWidth - UNIT_STEP);
+    foodY = randomFoodCoord(0, boardHeight - UNIT_STEP);
+  } while (snake.some(s => s.x === foodX && s.y === foodY))
 };
 
 function drawFood() {
@@ -92,7 +92,17 @@ function moveSnake() {
     x: snakeHeadX() + xVelocity,
     y: snakeHeadY() + yVelocity
   };
-
+  
+  if (head.x < 0) {
+    head.x = boardWidth - UNIT_STEP;
+  } else if (snakeHeadX() >= boardWidth) {
+    head.x = 0;
+  } else if (snakeHeadY() < 0) {
+    head.y = boardHeight -  UNIT_STEP;
+  } else if (snakeHeadY() >= boardHeight) {
+    head.y = 0;
+  }
+  
   snake.unshift(head);
 
   if (snakeHeadX() == foodX && snakeHeadY() == foodY) {
@@ -131,7 +141,8 @@ function changeDirection(event) {
 
 function checkGameOver() {
   if (snakeHeadX() < 0 || snakeHeadX() >= boardWidth || snakeHeadY() < 0 || snakeHeadY() >= boardHeight) {
-    isRunning = false;
+    // isRunning = false;
+    
   }
 
   for (let i = 1; i < snake.length; i++) {
@@ -155,6 +166,7 @@ function displayGameOver() {
 
 function resetGame() {
   score = 0;
+  scoreContext.textContent = score;
   xVelocity = UNIT_STEP;
   yVelocity = NO_STEP;
   snake = [...snakeInitial];
